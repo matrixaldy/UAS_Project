@@ -57,6 +57,7 @@
                     request.setAttribute("BELI", res.getString(8));
                     request.setAttribute("JUAL", res.getString(9));
                     request.setAttribute("UNT", res.getString(10));
+                    request.setAttribute("IMG", res.getString(11));
                 }
             } catch (Exception e) {
                 out.print(e);
@@ -67,7 +68,7 @@
 <html>
 <head>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-	<title></title>
+	<title>Barang</title>
 </head>
 <body>
 
@@ -81,14 +82,33 @@
       <li class="nav-item active">
         <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
       </li>
+      <%
+          String ses = (String)session.getAttribute("status");
+          if(ses != null && ses.equals("pegawai")) {
+      %>
       <li class="nav-item">
-        <a class="nav-link" href="index.jsp">Data Supplier</a>
+        <a class="nav-link" href="suplier.jsp">Data Supplier</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="buyer.jsp">Data Buyer</a>
       </li>
       <li class="nav-item active">
         <a class="nav-link" href="barang.jsp">Data Barang</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="logout.jsp">Logout</a>
+      </li>
+      <%
+          } else {
+      %>
+      <li class="nav-item">
+        <a class="nav-link" href="login.jsp">Login</a>
+      </li>
+      <%
+          }
+      %>
+      <li class="nav-item">
+        <a class="nav-link" href="katalog.jsp">Katalog</a>
       </li>
     </ul>
   </div>
@@ -137,6 +157,7 @@
                                     <option <%=request.getAttribute("KAT") != null && request.getAttribute("KAT").equals("Saus") ? "selected" : "" %> value="Saus">Saus</option>
                                     <option <%=request.getAttribute("KAT") != null && request.getAttribute("KAT").equals("Cemilan") ? "selected" : "" %> value="Cemilan">Cemilan</option>
                                     <option <%=request.getAttribute("KAT") != null && request.getAttribute("KAT").equals("Teh") ? "selected" : "" %> value="Teh">Teh</option>
+                                    <option <%=request.getAttribute("KAT") != null && request.getAttribute("KAT").equals("Pakaian") ? "selected" : "" %> value="Pakaian">Pakaian</option>
                                 </select>
                             </div>
                         </div>
@@ -192,6 +213,12 @@
                                       }
                                 }
                             </script>
+                        <div class="form-group row ">
+                            <label class="col-sm-2 col-form-label">Img source</label>
+                            <div class="col-sm-5">
+                                <input type="text" class="form-control" value="<%=request.getAttribute("IMG") != null ? request.getAttribute("IMG") : "" %>" name="sourceImg" placeholder="http://">
+                            </div>
+                        </div>
                         <div class="form-group row ">
                             <div class="col-md-9">
                                 <input type="submit" class="btn btn-primary btn-md col-sm-2" value="Simpan" name="cmdSimpan">
@@ -276,6 +303,7 @@
         String beli = request.getParameter("harga_beli");
         String jual = request.getParameter("harga_jual");
         String untung = request.getParameter("untung");
+        String img = request.getParameter("sourceImg");
         String id = request.getParameter("id");
 
         String dapat = request.getParameter("cmdSimpan");
@@ -284,8 +312,8 @@
                 Koneksi konek= new Koneksi();
                 Connection conn = konek.bukaKoneksi();
                 Statement st=conn.createStatement();
-                String sql = "INSERT INTO barang(kode, nama, deskripsi, kategori, jumlah, satuan, harga_beli, harga_jual, untung)"
-                        + " VALUES('"+kode+"', '"+nama+"', '"+deskripsi+"', '"+kategori+"', '"+jumlah+"', '"+satuan+"', '"+beli+"', '"+jual+"', '"+untung+"')";
+                String sql = "INSERT INTO barang(kode, nama, deskripsi, kategori, jumlah, satuan, harga_beli, harga_jual, untung, imgUrl)"
+                        + " VALUES('"+kode+"', '"+nama+"', '"+deskripsi+"', '"+kategori+"', '"+jumlah+"', '"+satuan+"', '"+beli+"', '"+jual+"', '"+untung+"', '"+img+"')";
 //                String sql = "INSERT INTO barang(kode, nama, deskripsi, kategori, jumlah, satuan, harga_beli, harga_jual, untung)"
 //                        + " VALUES('B0001', 'SHF S.H.Figuarts Kamen Rider Genm Zombie Action Gamer Level X-0', 'dsadasd', 'PVC Figure', '10', 'Box', '1320000', '1420000', '100000')";
                 System.out.println(sql);
@@ -305,7 +333,7 @@
                 Statement st=conn.createStatement();
                 String sql = "UPDATE barang SET kode = '"+kode+"', nama = '"+nama+"', deskripsi = '"+deskripsi+"', "
                         + "kategori = '"+kategori+"', jumlah = '"+jumlah+"', satuan = '"+satuan+"', "
-                        + "harga_beli = '"+beli+"', harga_jual = '"+jual+"', untung = '"+untung+"' WHERE id = '"+id+"'";
+                        + "harga_beli = '"+beli+"', harga_jual = '"+jual+"', untung = '"+untung+"', imgUrl = '"+img+"' WHERE id = '"+id+"'";
                 st.executeUpdate(sql);
                 out.print("<script>alert('Berhasil diubah')</script>"
                         + "<meta http-equiv='refresh' content='0'>");

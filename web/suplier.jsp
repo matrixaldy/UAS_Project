@@ -13,7 +13,7 @@
         Koneksi konek= new Koneksi();
         Connection conn = konek.bukaKoneksi();
         Statement st=conn.createStatement();
-        String sql = " SELECT MAX(RIGHT(kode, 4)) FROM barang";
+        String sql = " SELECT MAX(RIGHT(kode, 4)) FROM supplier";
         ResultSet res  = st.executeQuery(sql);
         if(res.next()) {
             if(res.getString(1) != null) {
@@ -24,9 +24,9 @@
                 for (int j = 0; j < 4 - NomorJual; j++) {
                     no = "0" + no;
                 }
-                request.setAttribute("KODE", "R"+no);
+                request.setAttribute("KODE", "S"+no);
             } else {
-                request.setAttribute("KODE", "R0001");
+                request.setAttribute("KODE", "S0001");
             }
         }
         res.close();
@@ -44,20 +44,19 @@
                 Koneksi konek= new Koneksi();
                 Connection conn = konek.bukaKoneksi();
                 Statement st=conn.createStatement();
-                String sql = "SELECT * FROM barang WHERE nama='"+nama+"'";
+                String sql = "SELECT * FROM supplier WHERE nama='"+nama+"'";
                 ResultSet res  = st.executeQuery(sql);
                 if(res.next()) {
                     request.setAttribute("id", res.getString(1));
                     request.setAttribute("KODE", res.getString(2));
                     request.setAttribute("NAMA", res.getString(3));
-                    request.setAttribute("DESKR", res.getString(4));
-                    request.setAttribute("KAT", res.getString(5));
-                    request.setAttribute("JUM", res.getString(6));
-                    request.setAttribute("SAT", res.getString(7));
-                    request.setAttribute("BELI", res.getString(8));
-                    request.setAttribute("JUAL", res.getString(9));
-                    request.setAttribute("UNT", res.getString(10));
-                    request.setAttribute("IMG", res.getString(11));
+                    request.setAttribute("ALAMAT", res.getString(4));
+                    request.setAttribute("NOHP", res.getString(5));
+                    request.setAttribute("EMAIL", res.getString(6));
+                    request.setAttribute("KONTAK", res.getString(7));
+                    request.setAttribute("NOREK", res.getString(8));
+                    request.setAttribute("BANK", res.getString(9));
+                    request.setAttribute("KET", res.getString(10));
                 }
             } catch (Exception e) {
                 out.print(e);
@@ -68,7 +67,7 @@
 <html>
 <head>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-	<title>Barang</title>
+	<title>Suplier</title>
 </head>
 <body>
 
@@ -86,13 +85,13 @@
           String ses = (String)session.getAttribute("status");
           if(ses != null && ses.equals("pegawai")) {
       %>
-      <li class="nav-item">
-        <a class="nav-link" href="suplier.jsp">Data Supplier</a>
+      <li class="nav-item active">
+        <a class="nav-link" href="index.jsp">Data Supplier</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="buyer.jsp">Data Buyer</a>
       </li>
-      <li class="nav-item active">
+      <li class="nav-item">
         <a class="nav-link" href="barang.jsp">Data Barang</a>
       </li>
       <li class="nav-item">
@@ -101,7 +100,7 @@
       <%
           } else {
       %>
-      <li class="nav-item">
+      <li class="nav-item active">
         <a class="nav-link" href="login.jsp">Login</a>
       </li>
       <%
@@ -123,14 +122,14 @@
                     <form name="formBarang" class="col-md-12" action="" method="POST">
                         <input type="hidden" name="id" value="<%=request.getAttribute("id") != null ? request.getAttribute("id") : "" %>">
                         <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Kode Barang</label>
+                            <label class="col-sm-2 col-form-label">Kode Supplier</label>
                             <div class="col-sm-5">
                                 <input readonly type="text" value="<%=request.getAttribute("KODE") != null ? request.getAttribute("KODE") : "" %>" class="form-control"  name="kode" placeholder="First">
                             </div>
                         </div>
 
                         <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Nama Barang</label>
+                            <label class="col-sm-2 col-form-label">Nama Supplier</label>
                             <div class="col-sm-5">
                                 <input type="text" value="<%=request.getAttribute("NAMA") != null ? request.getAttribute("NAMA") : "" %>" class="form-control"  name="nama" placeholder="Nama">
                             </div>
@@ -140,85 +139,61 @@
                         </div>
 
                         <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Deskripsi</label>
+                            <label class="col-sm-2 col-form-label">Alamat</label>
                             <div class="col-sm-5">
-                                <textarea name="deskripsi" class="form-control"><%=request.getAttribute("DESKR") != null ? request.getAttribute("DESKR") : "" %></textarea>
+                                <textarea name="alamat" class="form-control"><%=request.getAttribute("ALAMAT") != null ? request.getAttribute("ALAMAT") : "" %></textarea>
+                            </div>
+                        </div>
+                            
+                        <div class="form-group row ">
+                            <label class="col-sm-2 col-form-label">No Hp</label>
+                            <div class="col-sm-5">
+                                <input onkeypress="return angka(event)" maxlength="15" type="text" class="form-control" value="<%=request.getAttribute("NOHP") != null ? request.getAttribute("NOHP") : "" %>" name="noHp" placeholder="No HP">
+                            </div>
+                        </div>
+                            
+                        <div class="form-group row ">
+                            <label class="col-sm-2 col-form-label">Email</label>
+                            <div class="col-sm-5">
+                                <input type="email" class="form-control" value="<%=request.getAttribute("EMAIL") != null ? request.getAttribute("EMAIL") : "" %>" name="email" placeholder="example@domain.com">
+                            </div>
+                        </div>
+                            
+                        <div class="form-group row ">
+                            <label class="col-sm-2 col-form-label">Kontak</label>
+                            <div class="col-sm-5">
+                                <input type="text" class="form-control" value="<%=request.getAttribute("KONTAK") != null ? request.getAttribute("KONTAK") : "" %>" name="kontak" placeholder="Kontak">
+                            </div>
+                        </div>
+                            
+                        <div class="form-group row ">
+                            <label class="col-sm-2 col-form-label">No. Rekeneing</label>
+                            <div class="col-sm-5">
+                                <input type="text" class="form-control" value="<%=request.getAttribute("NOREK") != null ? request.getAttribute("NOREK") : "" %>" name="noRek" placeholder="No Rekening">
                             </div>
                         </div>
 
                         <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Kategori</label>
+                            <label class="col-sm-2 col-form-label">Bank</label>
                             <div class="col-sm-5">
-                                <select name="kategori" class="form-control">
-                                    <option selected>- Kategori -</option>
-                                    <option <%=request.getAttribute("KAT") != null && request.getAttribute("KAT").equals("Minyak Goreng") ? "selected" : "" %> value="Minyak Goreng">Minyak Goreng</option>
-                                    <option <%=request.getAttribute("KAT") != null && request.getAttribute("KAT").equals("Sabun Pembersih") ? "selected" : "" %> value="Sabun Pembersih">Sabun Pembersih</option>
-                                    <option <%=request.getAttribute("KAT") != null && request.getAttribute("KAT").equals("Kecap") ? "selected" : "" %> value="Kecap">Kecap</option>
-                                    <option <%=request.getAttribute("KAT") != null && request.getAttribute("KAT").equals("Saus") ? "selected" : "" %> value="Saus">Saus</option>
-                                    <option <%=request.getAttribute("KAT") != null && request.getAttribute("KAT").equals("Cemilan") ? "selected" : "" %> value="Cemilan">Cemilan</option>
-                                    <option <%=request.getAttribute("KAT") != null && request.getAttribute("KAT").equals("Teh") ? "selected" : "" %> value="Teh">Teh</option>
-                                    <option <%=request.getAttribute("KAT") != null && request.getAttribute("KAT").equals("Pakaian") ? "selected" : "" %> value="Pakaian">Pakaian</option>
+                                <select name="bank" class="form-control">
+                                    <option selected>- Bank -</option>
+                                    <option <%=request.getAttribute("BANK") != null && request.getAttribute("BANK").equals("BCA") ? "selected" : "" %> value="BCA">BCA</option>
+                                    <option <%=request.getAttribute("BANK") != null && request.getAttribute("BANK").equals("BNI") ? "selected" : "" %> value="BNI">BNI</option>
+                                    <option <%=request.getAttribute("BANK") != null && request.getAttribute("BANK").equals("BRI") ? "selected" : "" %> value="BRI">BRI</option>
+                                    <option <%=request.getAttribute("BANK") != null && request.getAttribute("BANK").equals("Danamon") ? "selected" : "" %> value="Danamon">Danamon</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Jumlah</label>
+                            <label class="col-sm-2 col-form-label">Keterangan</label>
                             <div class="col-sm-5">
-                                <input onkeypress="return angka(event)" type="text" class="form-control" value="<%=request.getAttribute("JUM") != null ? request.getAttribute("JUM") : "" %>" name="jumlah" placeholder="Jumlah">
+                                <textarea name="keterangan" class="form-control"><%=request.getAttribute("KET") != null ? request.getAttribute("KET") : "" %></textarea>
                             </div>
                         </div>
 
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Satuan</label>
-                            <div class="col-sm-5">
-                                <select name="satuan" class="form-control">
-                                    <option selected>- Satuan -</option>
-                                    <option <%=request.getAttribute("SAT") != null && request.getAttribute("SAT").equals("KILOGRAM") ? "selected" : "" %> value="KILOGRAM">KILOGRAM</option>
-                                    <option <%=request.getAttribute("SAT") != null && request.getAttribute("SAT").equals("LITER") ? "selected" : "" %> value="LITER">LITER</option>
-                                    <option <%=request.getAttribute("SAT") != null && request.getAttribute("SAT").equals("MILILITER") ? "selected" : "" %> value="MILILITER">MILILITER</option>
-                                    <option <%=request.getAttribute("SAT") != null && request.getAttribute("SAT").equals("GRAM") ? "selected" : "" %> value="GRAM">GRAM</option>
-                                    <option <%=request.getAttribute("SAT") != null && request.getAttribute("SAT").equals("PCS") ? "selected" : "" %> value="PCS">PCS</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Harga Beli</label>
-                            <div class="col-sm-5">
-                                <input autocomplete="off" value="<%=request.getAttribute("BELI") != null ? request.getAttribute("BELI") : "" %>" placeholder="Harga Beli" name="harga_beli" onkeypress="return angka(event)" type="number" min="0" class="form-control" id="txt1"  onkeyup="sum();" />
-                            </div>
-                        </div>
-
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Harga Jual</label>
-                            <div class="col-sm-5">
-                                <input autocomplete="off" value="<%=request.getAttribute("JUAL") != null ? request.getAttribute("JUAL") : "" %>" placeholder="Harga Jual" name="harga_jual" onkeypress="return angka(event)" type="number" min="0" id="txt2" class="form-control" onkeyup="sum();" />
-                            </div>
-                        </div>
-
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Untung</label>
-                            <div class="col-sm-5">
-                                <input name="untung" value="<%=request.getAttribute("UNT") != null ? request.getAttribute("UNT") : "" %>" onkeypress="return angka(event)" type="number" min="0" placeholder="Untung" class="form-control" id="txt3" />
-                            </div>
-                        </div>
-                            <script>
-                                function sum() {
-                                      var txtFirstNumberValue = document.getElementById('txt1').value;
-                                      var txtSecondNumberValue = document.getElementById('txt2').value;
-                                      var result = parseInt(txtSecondNumberValue) - parseInt(txtFirstNumberValue);
-                                      if (!isNaN(result)) {
-                                         document.getElementById('txt3').value = result;
-                                      }
-                                }
-                            </script>
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Img source</label>
-                            <div class="col-sm-5">
-                                <input type="text" class="form-control" value="<%=request.getAttribute("IMG") != null ? request.getAttribute("IMG") : "" %>" name="sourceImg" placeholder="http://">
-                            </div>
-                        </div>
+                        
                         <div class="form-group row ">
                             <div class="col-md-9">
                                 <input type="submit" class="btn btn-primary btn-md col-sm-2" value="Simpan" name="cmdSimpan">
@@ -296,14 +271,13 @@
     if(request.getParameterMap().containsKey("cmdSimpan") == true) {
         String kode = request.getParameter("kode");
         String nama = request.getParameter("nama");
-        String deskripsi = request.getParameter("deskripsi");
-        String kategori = request.getParameter("kategori");
-        String jumlah = request.getParameter("jumlah");
-        String satuan = request.getParameter("satuan");
-        String beli = request.getParameter("harga_beli");
-        String jual = request.getParameter("harga_jual");
-        String untung = request.getParameter("untung");
-        String img = request.getParameter("sourceImg");
+        String alamat = request.getParameter("alamat");
+        String noHp = request.getParameter("noHp");
+        String email = request.getParameter("email");
+        String kontak = request.getParameter("kontak");
+        String noRek = request.getParameter("noRek");
+        String bank = request.getParameter("bank");
+        String keterangan = request.getParameter("keterangan");
         String id = request.getParameter("id");
 
         String dapat = request.getParameter("cmdSimpan");
@@ -312,8 +286,8 @@
                 Koneksi konek= new Koneksi();
                 Connection conn = konek.bukaKoneksi();
                 Statement st=conn.createStatement();
-                String sql = "INSERT INTO barang(kode, nama, deskripsi, kategori, jumlah, satuan, harga_beli, harga_jual, untung, imgUrl)"
-                        + " VALUES('"+kode+"', '"+nama+"', '"+deskripsi+"', '"+kategori+"', '"+jumlah+"', '"+satuan+"', '"+beli+"', '"+jual+"', '"+untung+"', '"+img+"')";
+                String sql = "INSERT INTO supplier(kode, nama, alamat, noHp, email, kontak, noRek, bank, keterangan)"
+                        + " VALUES('"+kode+"', '"+nama+"', '"+alamat+"', '"+noHp+"', '"+email+"', '"+kontak+"', '"+noRek+"', '"+bank+"', '"+keterangan+"')";
 //                String sql = "INSERT INTO barang(kode, nama, deskripsi, kategori, jumlah, satuan, harga_beli, harga_jual, untung)"
 //                        + " VALUES('B0001', 'SHF S.H.Figuarts Kamen Rider Genm Zombie Action Gamer Level X-0', 'dsadasd', 'PVC Figure', '10', 'Box', '1320000', '1420000', '100000')";
                 System.out.println(sql);
@@ -331,9 +305,9 @@
                 Koneksi konek= new Koneksi();
                 Connection conn = konek.bukaKoneksi();
                 Statement st=conn.createStatement();
-                String sql = "UPDATE barang SET kode = '"+kode+"', nama = '"+nama+"', deskripsi = '"+deskripsi+"', "
-                        + "kategori = '"+kategori+"', jumlah = '"+jumlah+"', satuan = '"+satuan+"', "
-                        + "harga_beli = '"+beli+"', harga_jual = '"+jual+"', untung = '"+untung+"', imgUrl = '"+img+"' WHERE id = '"+id+"'";
+                String sql = "UPDATE supplier SET kode = '"+kode+"', nama = '"+nama+"', alamat = '"+alamat+"', "
+                        + "noHp = '"+noHp+"', email = '"+email+"', kontak = '"+kontak+"', "
+                        + "noRek = '"+noRek+"', bank = '"+bank+"', keterangan = '"+keterangan+"' WHERE id = '"+id+"'";
                 st.executeUpdate(sql);
                 out.print("<script>alert('Berhasil diubah')</script>"
                         + "<meta http-equiv='refresh' content='0'>");
@@ -347,7 +321,7 @@
                 Koneksi konek= new Koneksi();
                 Connection conn = konek.bukaKoneksi();
                 Statement st=conn.createStatement();
-                String sql = "DELETE FROM barang WHERE id='"+id+"'";
+                String sql = "DELETE FROM supplier WHERE id='"+id+"'";
                 st.executeUpdate(sql);
                 out.print("<script>alert('Berhasil dihapus')</script>"
                         + "<meta http-equiv='refresh' content='0'>");

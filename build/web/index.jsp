@@ -1,72 +1,227 @@
 <%-- 
-    Document   : index
-    Created on : May 17, 2020, 11:47:23 AM
+    Document   : katalog
+    Created on : May 23, 2020, 6:48:14 PM
     Author     : matri
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="jdbc.Koneksi" %>
 <%@page import="java.sql.*" %>
+<%@ taglib prefix = "c" uri = "http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix = "fmt" uri = "http://java.sun.com/jsp/jstl/fmt" %>
+<jsp:useBean id="cart" scope="session" class="beans.ShoppingCart" />
 <!DOCTYPE html>
-<%
-    try{
-        Koneksi konek= new Koneksi();
-        Connection conn = konek.bukaKoneksi();
-        Statement st=conn.createStatement();
-        String sql = " SELECT MAX(RIGHT(kode, 4)) FROM supplier";
-        ResultSet res  = st.executeQuery(sql);
-        if(res.next()) {
-            if(res.getString(1) != null) {
-                res.last();
-                int auto_id = res.getInt(1) + 1;
-                String no = String.valueOf(auto_id);
-                int NomorJual = no.length();
-                for (int j = 0; j < 4 - NomorJual; j++) {
-                    no = "0" + no;
-                }
-                request.setAttribute("KODE", "S"+no);
-            } else {
-                request.setAttribute("KODE", "S0001");
-            }
-        }
-        res.close();
-        st.close();
-    } catch (Exception e) {
-        out.print(e);
-    }
-    
-    if(request.getParameterMap().containsKey("cmdCari") == true) {
-        String nama = request.getParameter("nama");
-        String dapat = request.getParameter("cmdCari");
-        if(dapat.toString().equals("Cari")) {
-            try{
 
-                Koneksi konek= new Koneksi();
-                Connection conn = konek.bukaKoneksi();
-                Statement st=conn.createStatement();
-                String sql = "SELECT * FROM supplier WHERE nama='"+nama+"'";
-                ResultSet res  = st.executeQuery(sql);
-                if(res.next()) {
-                    request.setAttribute("id", res.getString(1));
-                    request.setAttribute("KODE", res.getString(2));
-                    request.setAttribute("NAMA", res.getString(3));
-                    request.setAttribute("ALAMAT", res.getString(4));
-                    request.setAttribute("NOHP", res.getString(5));
-                    request.setAttribute("EMAIL", res.getString(6));
-                    request.setAttribute("KONTAK", res.getString(7));
-                    request.setAttribute("NOREK", res.getString(8));
-                    request.setAttribute("BANK", res.getString(9));
-                    request.setAttribute("KET", res.getString(10));
-                }
-            } catch (Exception e) {
-                out.print(e);
-            }
-        }
-    }
-%>
 <html>
 <head>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <style>
+		
+
+
+/*
+* @subsection Shop
+*/
+.product {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.product .caption {
+  margin-top: 15px;
+}
+
+.product .caption h6 {
+  color: #455a64;
+}
+
+.product .caption .price + .price {
+  margin-left: 15px;
+}
+
+.product.tumbnail {
+  box-shadow: 0 5px 25px 0 transparent;
+  transition: 0.3s linear;
+  padding-top: 0;
+}
+
+.product.tumbnail img:hover {
+  box-shadow: 0 5px 25px 0 rgba(0, 0, 0, 0.2);
+}
+
+.single-product span {
+  display: inline-block;
+}
+
+.single-product .rating .fa-star, .single-product .rating .fa-star-o {
+  font-size: 16px;
+  color: #f7d4a0;
+  margin-left: 2px;
+}
+
+.single-product .rating + * {
+  margin-left: 15px;
+}
+
+.single-product h1.h1-variant-2 {
+  margin-bottom: 20px;
+}
+
+.single-product .caption:before {
+  content: '';
+  height: 100%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.single-product .caption span {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.single-product .caption .price {
+  font-weight: 400;
+}
+
+.single-product .caption .price.sale {
+  color: #e75854;
+  font-size: 33px;
+}
+
+.single-product .caption * + .price {
+  margin-left: 10.8%;
+}
+
+@media (max-width: 1199px) {
+  .single-product .caption * + .price {
+    margin-left: 7.8%;
+  }
+}
+
+.single-product .caption * + .quantity {
+  margin-left: 26px;
+}
+
+.single-product .caption .info-list {
+  border-bottom: 1px solid #f3f3ed;
+  border-top: 1px solid #f3f3ed;
+  font-family: Montserrat, sans-serif;
+  padding-top: 26px;
+  padding-bottom: 26px;
+  text-align: left;
+}
+
+.single-product .caption .info-list dt, .single-product .caption .info-list dd {
+  display: inline-block;
+  line-height: 25px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.single-product .caption .info-list dt {
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  color: #a7b0b4;
+  width: 35%;
+  text-transform: uppercase;
+}
+
+.single-product .caption .info-list dd {
+  font-size: 15px;
+  color: #565452;
+  width: 62.5%;
+}
+
+.single-product .caption .share span.small {
+  margin-top: 9px;
+}
+
+@media (max-width: 991px) {
+  .single-product .caption .share span.small {
+    display: block;
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 767px) {
+  .single-product .table-mobile tr {
+    padding-top: 0;
+  }
+  .single-product .table-mobile tr:before {
+    display: none;
+  }
+}
+
+.price {
+  display: inline-block;
+  font-size: 15px;
+  font-family: Montserrat, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #2b2f3e;
+}
+
+.price.sale {
+  color: #e75854;
+}
+
+.price del {
+  color: #b0bec5;
+}
+
+.quantity {
+  text-align: center;
+  font-family: Montserrat, sans-serif;
+  font-size: 12px;
+  background: #eceff1;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 82px;
+  height: auto;
+  display: inline-block;
+}
+
+.quantity span {
+  display: inline-block;
+}
+
+.quantity .num {
+  width: 26px;
+}
+
+.quantity [class*='fa-'] {
+  padding-top: 4px;
+  width: 22px;
+  padding-bottom: 4px;
+  color: #b0bec5;
+  cursor: pointer;
+}
+
+.quantity [class*='fa-']:hover {
+  color: #455a64;
+}
+
+.float{
+    position:fixed;
+    width:60px;
+    height:60px;
+    bottom:40px;
+    right:40px;
+    background-color:red;
+    color:#FFF;
+    border-radius:50px;
+    text-align:center;
+    box-shadow: 2px 2px 3px #999;
+    font-size: 1.2em;
+}
+
+.my-float{
+    margin-top:22px;
+}
+	</style>
 	<title></title>
 </head>
 <body>
@@ -81,14 +236,33 @@
       <li class="nav-item active">
         <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
       </li>
-      <li class="nav-item active">
-        <a class="nav-link" href="index.jsp">Data Supplier</a>
+      <%
+          String ses = (String)session.getAttribute("status");
+          if(ses != null && ses.equals("pegawai")) {
+      %>
+      <li class="nav-item">
+        <a class="nav-link" href="suplier.jsp">Data Supplier</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="buyer.jsp">Data Buyer</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="barang.jsp">Data Barang</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="logout.jsp">Logout</a>
+      </li>
+      <%
+          } else {
+      %>
+      <li class="nav-item">
+        <a class="nav-link" href="login.jsp">Login</a>
+      </li>
+      <%
+          }
+      %>
+      <li class="nav-item">
+        <a class="nav-link" href="katalog.jsp">Katalog</a>
       </li>
     </ul>
   </div>
@@ -98,138 +272,134 @@
 <div class="blank" style="padding: 10px"></div>
 
 <main role="main" class="container-fluid">
-            <div class="row">
-                <div class="col-lg-8">
-                    <form name="formBarang" class="col-md-12" action="" method="POST">
-                        <input type="hidden" name="id" value="<%=request.getAttribute("id") != null ? request.getAttribute("id") : "" %>">
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Kode Supplier</label>
-                            <div class="col-sm-5">
-                                <input readonly type="text" value="<%=request.getAttribute("KODE") != null ? request.getAttribute("KODE") : "" %>" class="form-control"  name="kode" placeholder="First">
-                            </div>
-                        </div>
-
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Nama Supplier</label>
-                            <div class="col-sm-5">
-                                <input type="text" value="<%=request.getAttribute("NAMA") != null ? request.getAttribute("NAMA") : "" %>" class="form-control"  name="nama" placeholder="Nama">
-                            </div>
-                            <div class="col-sm-2">
-                                <input type="submit" name="cmdCari" class="btn btn-block btn-sm btn-info cari" value="Cari">
-                            </div>
-                        </div>
-
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Alamat</label>
-                            <div class="col-sm-5">
-                                <textarea name="alamat" class="form-control"><%=request.getAttribute("ALAMAT") != null ? request.getAttribute("ALAMAT") : "" %></textarea>
-                            </div>
-                        </div>
-                            
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">No Hp</label>
-                            <div class="col-sm-5">
-                                <input onkeypress="return angka(event)" maxlength="15" type="text" class="form-control" value="<%=request.getAttribute("NOHP") != null ? request.getAttribute("NOHP") : "" %>" name="noHp" placeholder="No HP">
-                            </div>
-                        </div>
-                            
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Email</label>
-                            <div class="col-sm-5">
-                                <input type="email" class="form-control" value="<%=request.getAttribute("EMAIL") != null ? request.getAttribute("EMAIL") : "" %>" name="email" placeholder="example@domain.com">
-                            </div>
-                        </div>
-                            
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Kontak</label>
-                            <div class="col-sm-5">
-                                <input type="text" class="form-control" value="<%=request.getAttribute("KONTAK") != null ? request.getAttribute("KONTAK") : "" %>" name="kontak" placeholder="Kontak">
-                            </div>
-                        </div>
-                            
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">No. Rekeneing</label>
-                            <div class="col-sm-5">
-                                <input type="text" class="form-control" value="<%=request.getAttribute("NOREK") != null ? request.getAttribute("NOREK") : "" %>" name="noRek" placeholder="No Rekening">
-                            </div>
-                        </div>
-
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Bank</label>
-                            <div class="col-sm-5">
-                                <select name="bank" class="form-control">
-                                    <option selected>- Bank -</option>
-                                    <option <%=request.getAttribute("BANK") != null && request.getAttribute("BANK").equals("BCA") ? "selected" : "" %> value="BCA">BCA</option>
-                                    <option <%=request.getAttribute("BANK") != null && request.getAttribute("BANK").equals("BNI") ? "selected" : "" %> value="BNI">BNI</option>
-                                    <option <%=request.getAttribute("BANK") != null && request.getAttribute("BANK").equals("BRI") ? "selected" : "" %> value="BRI">BRI</option>
-                                    <option <%=request.getAttribute("BANK") != null && request.getAttribute("BANK").equals("Danamon") ? "selected" : "" %> value="Danamon">Danamon</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row ">
-                            <label class="col-sm-2 col-form-label">Keterangan</label>
-                            <div class="col-sm-5">
-                                <textarea name="keterangan" class="form-control"><%=request.getAttribute("KET") != null ? request.getAttribute("KET") : "" %></textarea>
-                            </div>
-                        </div>
-
-                        
-                        <div class="form-group row ">
-                            <div class="col-md-9">
-                                <input type="submit" class="btn btn-primary btn-md col-sm-2" value="Simpan" name="cmdSimpan">
-                                &nbsp;
-                                <input type="submit" class="btn btn-primary btn-md col-sm-2" value="Ubah" name="cmdSimpan">
-                                &nbsp;
-                                <input type="submit" class="btn btn-primary btn-md col-sm-2" value="Hapus" name="cmdSimpan">
-                                &nbsp;
-                                <input type="submit" class="btn btn-danger btn-md col-sm-2 reset" name="cmdReset" value="Batal">
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-                <div class="col-lg-4">
-                    UAS Matakuliah Java Web Programming
-                    <br>Kelompok &nbsp;&nbsp;AB
-                    <div class="row">
-                        <div class="col-sm-3">
-                            Dosen
-                        </div>
-                        <div class="col-sm-7">
-                            : Ratna Kusumawardani
-                        </div>
-                    </div>
-                    <br>Dibuat Oleh:
-                    <div class="row">
-                        <div class="col-sm-7">
-                            1711502847 - Aldy Curniawan
-                        </div>
-                        <div class="col-sm-5">
-                            : M & C
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-7">
-                            1711502854 - M. Irving Johan R.
-                        </div>
-                        <div class="col-sm-5">
-                            : V & C
-                        </div>
-                    </div>
-                    <br>*Keterangan:
-                    <div class="row">
-                        <div class="col-sm-12">
-                            M : Model<br>
-                            V : View<br>
-                            C : Controller
-                        </div>
+            
+<a href="cart.jsp" class="float">
+    <%
+            String id = request.getParameter("id");
+            if(id!= null) {
+                String desc = request.getParameter("desc");
+                Float price = new Float(request.getParameter("price"));
+                String img = request.getParameter("img");
+                cart.addItem(id, desc, price.floatValue(),1,img);
+            }
+        %>
+    <i class="fa fa-cart-plus my-float"> 
+        <%=
+            cart.getNumOfItems()
+        %></i>
+</a>
+ <div class="container bootstrap snipets">
+   <h1 class="text-center text-muted">Product catalog</h1>
+   
+   <div class="row flow-offset-1">
+       
+       <%
+           try {
+                Koneksi konek= new Koneksi();
+                Connection conn = konek.bukaKoneksi();
+                Statement st=conn.createStatement();
+                String sql = " SELECT * FROM barang ORDER BY 'id' DESC";
+                ResultSet res  = st.executeQuery(sql);
+                while(res.next()) {
+        %>
+        <div class="col-xs-6 col-md-4">
+            <form method="post">
+                <input type="hidden" name="id" value="<%=res.getString("id") %>">
+                <input type="hidden" name="desc" value="<%=res.getString("nama") %>">
+                <input type="hidden" name="price" value="<%=res.getString("harga_jual") %>">
+                <input type="hidden" name="img" value="<%=res.getString("imgUrl") %>">
+                
+                <div class="product tumbnail thumbnail-3"><a href="#"><img src="<%=res.getString("imgUrl") %>" alt=""></a>
+                    <div class="caption">
+                        <h6><a href="#"><%=res.getString("nama") %></a></h6><span class="price">Rp <fmt:formatNumber value = "<%=res.getString("harga_jual") %>" maxFractionDigits = "3"/></span>
+                        <input type="submit" name="submit" value="Add">
                     </div>
                 </div>
-            </div>
-        </main>
+            </form>
+        </div>
+       <%
+                }
+           } catch (Exception e) {
+               out.print(e);
+           }
+        %>
+       
+<!--     <div class="col-xs-6 col-md-4">
+       <div class="product tumbnail thumbnail-3"><a href="#"><img src="http://static.livedemo00.template-help.com/wt_58434/images/shop-1.jpg" alt=""></a>
+         <div class="caption">
+           <h6><a href="#">Short Sleeve T-Shirt</a></h6><span class="price">
+             <del>$24.99</del></span><span class="price sale">$12.49</span>
+         </div>
+       </div>
+     </div>
+     <div class="col-xs-6 col-md-4">
+       <div class="product tumbnail thumbnail-3"><a href="#"><img src="http://static.livedemo00.template-help.com/wt_58434/images/shop-2.jpg" alt=""></a>
+         <div class="caption">
+           <h6><a href="#">Short Sleeve T-Shirt</a></h6><span class="price">
+             <del>$24.99</del></span><span class="price sale">$12.49</span>
+         </div>
+       </div>
+     </div>
+     <div class="col-xs-6 col-md-4">
+       <div class="product tumbnail thumbnail-3"><a href="#"><img src="http://static.livedemo00.template-help.com/wt_58434/images/shop-3.jpg" alt=""></a>
+         <div class="caption">
+           <h6><a href="#">Short Sleeve T-Shirt</a></h6><span class="price">$12.49</span>
+         </div>
+       </div>
+     </div>
+     <div class="col-xs-6 col-md-4">
+       <div class="product tumbnail thumbnail-3"><a href="#"><img src="http://static.livedemo00.template-help.com/wt_58434/images/shop-4.jpg" alt=""></a>
+         <div class="caption">
+           <h6><a href="#">Short Sleeve T-Shirt</a></h6><span class="price">
+             <del>$24.99</del></span><span class="price sale">$12.49</span>
+         </div>
+       </div>
+     </div>
+     <div class="col-xs-6 col-md-4">
+       <div class="product tumbnail thumbnail-3"><a href="#"><img src="http://static.livedemo00.template-help.com/wt_58434/images/shop-5.jpg" alt=""></a>
+         <div class="caption">
+           <h6><a href="#">Short Sleeve T-Shirt</a></h6><span class="price">
+             <del>$24.99</del></span><span class="price sale">$12.49</span>
+         </div>
+       </div>
+     </div>
+     <div class="col-xs-6 col-md-4">
+       <div class="product tumbnail thumbnail-3"><a href="#"><img src="http://static.livedemo00.template-help.com/wt_58434/images/shop-6.jpg" alt=""></a>
+         <div class="caption">
+           <h6><a href="#">Short Sleeve T-Shirt</a></h6><span class="price">
+             <del>$24.99</del></span><span class="price sale">$12.49</span>
+         </div>
+       </div>
+     </div>
+     <div class="col-xs-6 col-md-4">
+       <div class="product tumbnail thumbnail-3"><a href="#"><img src="http://static.livedemo00.template-help.com/wt_58434/images/shop-7.jpg" alt=""></a>
+         <div class="caption">
+           <h6><a href="#">Short Sleeve T-Shirt</a></h6><span class="price">$12.49</span>
+         </div>
+       </div>
+     </div>
+     <div class="col-xs-6 col-md-4">
+       <div class="product tumbnail thumbnail-3"><a href="#"><img src="http://static.livedemo00.template-help.com/wt_58434/images/shop-8.jpg" alt=""></a>
+         <div class="caption">
+           <h6><a href="#">Short Sleeve T-Shirt</a></h6><span class="price">
+             <del>$24.99</del></span><span class="price sale">$12.49</span>
+         </div>
+       </div>
+     </div>
+     <div class="col-xs-6 col-md-4">
+       <div class="product tumbnail thumbnail-3"><a href="#"><img src="http://static.livedemo00.template-help.com/wt_58434/images/shop-9.jpg" alt=""></a>
+         <div class="caption">
+           <h6><a href="#">Short Sleeve T-Shirt</a></h6><span class="price">
+             <del>$24.99</del></span><span class="price sale">$12.49</span>
+         </div>
+       </div>
+     </div>-->
+   </div>
+ </div>                    
+                                
+ </main>
 
-	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script>
@@ -245,71 +415,3 @@
     </script>
 </body>
 </html>
-<%
-    if(request.getParameterMap().containsKey("cmdReset") == true) {
-        out.print("<meta http-equiv='refresh' content='0'>");
-    }
-    if(request.getParameterMap().containsKey("cmdSimpan") == true) {
-        String kode = request.getParameter("kode");
-        String nama = request.getParameter("nama");
-        String alamat = request.getParameter("alamat");
-        String noHp = request.getParameter("noHp");
-        String email = request.getParameter("email");
-        String kontak = request.getParameter("kontak");
-        String noRek = request.getParameter("noRek");
-        String bank = request.getParameter("bank");
-        String keterangan = request.getParameter("keterangan");
-        String id = request.getParameter("id");
-
-        String dapat = request.getParameter("cmdSimpan");
-        if(dapat.toString().equals("Simpan")) {
-            try{
-                Koneksi konek= new Koneksi();
-                Connection conn = konek.bukaKoneksi();
-                Statement st=conn.createStatement();
-                String sql = "INSERT INTO supplier(kode, nama, alamat, noHp, email, kontak, noRek, bank, keterangan)"
-                        + " VALUES('"+kode+"', '"+nama+"', '"+alamat+"', '"+noHp+"', '"+email+"', '"+kontak+"', '"+noRek+"', '"+bank+"', '"+keterangan+"')";
-//                String sql = "INSERT INTO barang(kode, nama, deskripsi, kategori, jumlah, satuan, harga_beli, harga_jual, untung)"
-//                        + " VALUES('B0001', 'SHF S.H.Figuarts Kamen Rider Genm Zombie Action Gamer Level X-0', 'dsadasd', 'PVC Figure', '10', 'Box', '1320000', '1420000', '100000')";
-                System.out.println(sql);
-                st.executeUpdate(sql);
-                out.print("<script>alert('Berhasil disimpan')</script>"
-                        + "<meta http-equiv='refresh' content='0'>");
-                //out.print("<a href='index.jsp'>Back</a>");
-            } catch (Exception e) {
-                out.print(e);
-            }
-        }
-
-        if(dapat.toString().equals("Ubah")) {
-            try{
-                Koneksi konek= new Koneksi();
-                Connection conn = konek.bukaKoneksi();
-                Statement st=conn.createStatement();
-                String sql = "UPDATE supplier SET kode = '"+kode+"', nama = '"+nama+"', alamat = '"+alamat+"', "
-                        + "noHp = '"+noHp+"', email = '"+email+"', kontak = '"+kontak+"', "
-                        + "noRek = '"+noRek+"', bank = '"+bank+"', keterangan = '"+keterangan+"' WHERE id = '"+id+"'";
-                st.executeUpdate(sql);
-                out.print("<script>alert('Berhasil diubah')</script>"
-                        + "<meta http-equiv='refresh' content='0'>");
-            } catch (Exception e) {
-                out.print(e);
-            }
-        }
-
-        if(dapat.toString().equals("Hapus")) {
-            try{
-                Koneksi konek= new Koneksi();
-                Connection conn = konek.bukaKoneksi();
-                Statement st=conn.createStatement();
-                String sql = "DELETE FROM supplier WHERE id='"+id+"'";
-                st.executeUpdate(sql);
-                out.print("<script>alert('Berhasil dihapus')</script>"
-                        + "<meta http-equiv='refresh' content='0'>");
-            } catch (Exception e) {
-                out.print(e);
-            }
-        }
-    }
-
-%>

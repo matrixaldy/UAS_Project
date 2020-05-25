@@ -261,7 +261,7 @@
       <%
           }
       %>
-      <li class="nav-item">
+      <li class="nav-item active">
         <a class="nav-link" href="katalog.jsp">Katalog</a>
       </li>
     </ul>
